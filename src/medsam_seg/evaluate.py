@@ -63,8 +63,9 @@ def evaluate(config: AppConfig, model_path: Path | None = None) -> dict:
 
     from medsam_seg.train import plot_samples
 
-    plot_samples(X_test, y_test, y_pred_binary, out_dir / "evaluation_samples.png",
-                 config.eval.num_samples)
+    plot_samples(
+        X_test, y_test, y_pred_binary, out_dir / "evaluation_samples.png", config.eval.num_samples
+    )
 
     print(f"Evaluated {len(test_pairs)} images with {model_path.name}")
     for key in ("accuracy", "dice", "iou", "f1"):
@@ -90,11 +91,14 @@ def per_image_scores(config: AppConfig, model_path: Path | None = None) -> list[
             pair, tuple(config.data.image_size), config.data.mask_threshold
         )
         prediction = model.predict(image[np.newaxis, ...], verbose=0)[0]
-        rows.append({
-            "name": pair.name,
-            **metrics.compute_all(mask, prediction, config.eval.threshold),
-            "foreground_percent": metrics.foreground_fraction(prediction,
-                                                              config.eval.threshold),
-        })
+        rows.append(
+            {
+                "name": pair.name,
+                **metrics.compute_all(mask, prediction, config.eval.threshold),
+                "foreground_percent": metrics.foreground_fraction(
+                    prediction, config.eval.threshold
+                ),
+            }
+        )
     rows.sort(key=lambda row: row["dice"])
     return rows

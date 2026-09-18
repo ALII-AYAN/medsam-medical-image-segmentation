@@ -3,13 +3,13 @@
 __version__ = "1.0.0"
 
 __all__ = [
+    "cli",
     "config",
     "data",
+    "evaluate",
+    "gui",
     "metrics",
     "models",
-    "train",
-    "evaluate",
     "predict",
-    "gui",
-    "cli",
+    "train",
 ]

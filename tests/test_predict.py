@@ -5,7 +5,10 @@ import pytest
 from PIL import Image
 
 from medsam_seg.predict import (
-    COMPARE_ARCHITECTURES, PredictionResult, find_weights, make_overlay,
+    COMPARE_ARCHITECTURES,
+    PredictionResult,
+    find_weights,
+    make_overlay,
     save_mask,
 )
 
@@ -18,7 +21,7 @@ class _StubModel:
 
     def predict(self, batch, verbose=0):
         out = np.zeros((batch.shape[0], *self.size, 1), dtype=np.float32)
-        out[..., : self.size[0] // 2, :] = 0.9   # top half is "foreground"
+        out[..., : self.size[0] // 2, :] = 0.9  # top half is "foreground"
         return out
 
 
@@ -43,7 +46,7 @@ def test_preprocess_from_pil():
 
 
 def test_preprocess_from_array_is_scaled():
-    array = np.full((40, 40, 3), 200, dtype=np.float32)   # 0-255 range
+    array = np.full((40, 40, 3), 200, dtype=np.float32)  # 0-255 range
     batch = _predictor().preprocess(array)
     assert batch.max() <= 1.0
     assert batch.max() > 0.5

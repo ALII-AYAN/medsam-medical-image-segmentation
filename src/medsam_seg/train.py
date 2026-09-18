@@ -55,8 +55,10 @@ def build_loss(name: str, pos_weight: float = 1.0):
     if name == "dice":
         return dice_loss
     if name == "bce_dice":
+
         def combined(y_true, y_pred):
             return weighted_bce(y_true, y_pred, pos_weight) + dice_loss(y_true, y_pred)
+
         return combined
     raise ValueError(f"unknown loss '{name}'")
 
@@ -127,8 +129,7 @@ def plot_history(history, destination: Path) -> Path:
     return destination
 
 
-def plot_samples(images, masks_true, masks_pred, destination: Path,
-                 num_samples: int = 3) -> Path:
+def plot_samples(images, masks_true, masks_pred, destination: Path, num_samples: int = 3) -> Path:
     """Side-by-side input / ground truth / prediction / overlay grid."""
     import matplotlib
 
@@ -174,8 +175,7 @@ def train(config: AppConfig) -> dict:
     )
     if not pairs:
         raise FileNotFoundError(
-            f"no image/mask pairs found in {config.data.image_dir} "
-            f"and {config.data.mask_dir}"
+            f"no image/mask pairs found in {config.data.image_dir} and {config.data.mask_dir}"
         )
 
     train_pairs, test_pairs = data_module.split_pairs(
@@ -233,13 +233,16 @@ def train(config: AppConfig) -> dict:
         from tensorflow.keras.callbacks import EarlyStopping
 
         callbacks.append(
-            EarlyStopping(monitor="val_loss",
-                          patience=config.training.early_stopping_patience,
-                          restore_best_weights=True)
+            EarlyStopping(
+                monitor="val_loss",
+                patience=config.training.early_stopping_patience,
+                restore_best_weights=True,
+            )
         )
 
     history = model.fit(
-        X_train, y_train,
+        X_train,
+        y_train,
         epochs=config.training.epochs,
         batch_size=config.training.batch_size,
         validation_data=(X_test, y_test),
@@ -266,8 +269,9 @@ def train(config: AppConfig) -> dict:
     out_dir = Path(config.training.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     plot_history(history, out_dir / "training_history.png")
-    plot_samples(X_test, y_test, y_pred_binary, out_dir / "sample_predictions.png",
-                 config.eval.num_samples)
+    plot_samples(
+        X_test, y_test, y_pred_binary, out_dir / "sample_predictions.png", config.eval.num_samples
+    )
     (out_dir / "metrics.json").write_text(json.dumps(scores, indent=2), encoding="utf-8")
 
     print("\n" + "=" * 60)

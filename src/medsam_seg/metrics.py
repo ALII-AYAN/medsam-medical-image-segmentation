@@ -22,8 +22,9 @@ def _flat(y_true: np.ndarray, y_pred: np.ndarray, threshold: float):
     return true_flat, pred_flat
 
 
-def dice_score(y_true: np.ndarray, y_pred: np.ndarray, threshold: float = 0.5,
-               smooth: float = 1.0) -> float:
+def dice_score(
+    y_true: np.ndarray, y_pred: np.ndarray, threshold: float = 0.5, smooth: float = 1.0
+) -> float:
     """Sorensen-Dice coefficient: 2|X&Y| / (|X| + |Y|)."""
     t, p = _flat(y_true, y_pred, threshold)
     intersection = float(np.sum(t * p))
@@ -34,8 +35,9 @@ def dice_score(y_true: np.ndarray, y_pred: np.ndarray, threshold: float = 0.5,
     return (2.0 * intersection + smooth) / (denominator + smooth)
 
 
-def iou_score(y_true: np.ndarray, y_pred: np.ndarray, threshold: float = 0.5,
-              smooth: float = 1.0) -> float:
+def iou_score(
+    y_true: np.ndarray, y_pred: np.ndarray, threshold: float = 0.5, smooth: float = 1.0
+) -> float:
     """Jaccard index: |X&Y| / |X|Y|."""
     t, p = _flat(y_true, y_pred, threshold)
     intersection = float(np.sum(t * p))
@@ -77,8 +79,9 @@ def f1_score(y_true: np.ndarray, y_pred: np.ndarray, threshold: float = 0.5) -> 
     return 2.0 * precision * recall / (precision + recall)
 
 
-def class_accuracy(y_true: np.ndarray, y_pred: np.ndarray, class_value: int,
-                   threshold: float = 0.5) -> float:
+def class_accuracy(
+    y_true: np.ndarray, y_pred: np.ndarray, class_value: int, threshold: float = 0.5
+) -> float:
     """Accuracy restricted to the pixels of one class.
 
     Overall accuracy is dominated by background whenever the mask is

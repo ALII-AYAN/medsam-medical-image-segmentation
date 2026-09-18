@@ -23,7 +23,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from medsam_seg.data import IMAGE_EXTENSIONS, find_mask  # noqa: E402
+from medsam_seg.data import IMAGE_EXTENSIONS, find_mask
 
 
 def collect(directory: Path) -> list[Path]:
@@ -35,8 +35,9 @@ def collect(directory: Path) -> list[Path]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--images", required=True, type=Path)
     parser.add_argument("--masks", required=True, type=Path)
     parser.add_argument("--output", default=PROJECT_ROOT / "data", type=Path)

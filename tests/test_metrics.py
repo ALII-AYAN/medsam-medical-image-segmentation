@@ -4,8 +4,16 @@ import numpy as np
 import pytest
 
 from medsam_seg.metrics import (
-    class_accuracy, class_distribution, compute_all, dice_score, f1_score,
-    foreground_fraction, iou_score, pixel_accuracy, precision_score, recall_score,
+    class_accuracy,
+    class_distribution,
+    compute_all,
+    dice_score,
+    f1_score,
+    foreground_fraction,
+    iou_score,
+    pixel_accuracy,
+    precision_score,
+    recall_score,
 )
 
 
@@ -68,7 +76,7 @@ def test_pixel_accuracy(flat_masks):
 def test_accuracy_is_dominated_by_background():
     """The reason per-class accuracy exists: 90% background is 90% 'accurate'."""
     truth = np.zeros((10, 10), dtype=np.float32)
-    truth[0, 0] = 1.0                       # a single foreground pixel
+    truth[0, 0] = 1.0  # a single foreground pixel
     prediction = np.zeros((10, 10), dtype=np.float32)
     assert pixel_accuracy(truth, prediction) == pytest.approx(0.99)
     assert dice_score(truth, prediction, smooth=0.0) == pytest.approx(0.0)
@@ -94,7 +102,7 @@ def test_per_class_accuracy(flat_masks):
     truth, prediction = flat_masks
     # 8 background pixels, 4 of them predicted foreground -> 0.5
     assert class_accuracy(truth, prediction, 0) == pytest.approx(0.5)
-    assert class_accuracy(truth, prediction, 1) == pytest.approx(1.0)     # all fg found
+    assert class_accuracy(truth, prediction, 1) == pytest.approx(1.0)  # all fg found
 
 
 def test_per_class_accuracy_of_absent_class_is_nan():

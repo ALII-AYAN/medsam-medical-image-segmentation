@@ -59,8 +59,7 @@ class Predictor:
         self.image_size = tuple(image_size)
 
     @classmethod
-    def from_path(cls, path: Path, name: str = "medsam",
-                  image_size=(256, 256)) -> "Predictor":
+    def from_path(cls, path: Path, name: str = "medsam", image_size=(256, 256)) -> Predictor:
         from tensorflow.keras.models import load_model
 
         path = Path(path)
@@ -83,8 +82,7 @@ class Predictor:
 
         # Resize expects (height, width); PIL stores images that way already.
         pil = Image.fromarray((array * 255.0).clip(0, 255).astype(np.uint8))
-        resized = np.asarray(pil.resize(self.image_size, Image.BILINEAR),
-                             dtype=np.float32) / 255.0
+        resized = np.asarray(pil.resize(self.image_size, Image.BILINEAR), dtype=np.float32) / 255.0
         return resized[np.newaxis, ...]
 
     def predict(self, image, threshold: float = 0.5) -> PredictionResult:
@@ -104,8 +102,9 @@ class Predictor:
         )
 
 
-def score_against(result: PredictionResult, ground_truth: np.ndarray,
-                  threshold: float = 0.5) -> PredictionResult:
+def score_against(
+    result: PredictionResult, ground_truth: np.ndarray, threshold: float = 0.5
+) -> PredictionResult:
     """Fill in Dice/IoU once a ground-truth mask is available."""
     from medsam_seg.metrics import dice_score, iou_score
 
@@ -144,9 +143,13 @@ class ComparisonReport:
         }
 
 
-def compare_models(image, weights_dir: Path, image_size=(256, 256),
-                   threshold: float = 0.5,
-                   ground_truth: np.ndarray | None = None) -> ComparisonReport:
+def compare_models(
+    image,
+    weights_dir: Path,
+    image_size=(256, 256),
+    threshold: float = 0.5,
+    ground_truth: np.ndarray | None = None,
+) -> ComparisonReport:
     """Run each architecture that has weights; list the ones that do not.
 
     Architectures with no saved weights are returned in ``missing`` so the UI
@@ -169,8 +172,14 @@ def compare_models(image, weights_dir: Path, image_size=(256, 256),
             report.results.append(result)
         except Exception as exc:  # noqa: BLE001 - one bad file must not kill the run
             report.results.append(
-                PredictionResult(name, np.zeros(image_size, dtype=np.float32), 0.0, 0.0,
-                                 available=False, note=f"load failed: {exc}")
+                PredictionResult(
+                    name,
+                    np.zeros(image_size, dtype=np.float32),
+                    0.0,
+                    0.0,
+                    available=False,
+                    note=f"load failed: {exc}",
+                )
             )
     return report
 

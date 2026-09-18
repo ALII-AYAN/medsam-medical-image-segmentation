@@ -5,7 +5,12 @@ import pytest
 from PIL import Image
 
 from medsam_seg.data import (
-    discover_pairs, find_mask, load_image, load_pair, load_split, split_pairs,
+    discover_pairs,
+    find_mask,
+    load_image,
+    load_pair,
+    load_split,
+    split_pairs,
 )
 
 
@@ -73,7 +78,7 @@ def test_load_image_grayscale_has_channel_axis(dataset_dir):
 
 
 def test_load_pair_binarises_the_mask(dataset_dir):
-    image, mask = load_pair(
+    _image, mask = load_pair(
         __import__("medsam_seg.data", fromlist=["Pair"]).Pair(
             dataset_dir / "images" / "case4.png", dataset_dir / "masks" / "case4_mask.png"
         ),

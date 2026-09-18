@@ -12,15 +12,21 @@ from typing import Callable
 ARCHITECTURES = ("unet", "deeplabv3", "segnet")
 
 
-def build_unet(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
-               dropout: float = 0.2, depth: int = 3):
+def build_unet(
+    input_shape=(256, 256, 3), filters=(32, 64, 128, 256), dropout: float = 0.2, depth: int = 3
+):
     """Enhanced U-Net: encoder, bottleneck, decoder with skip connections.
 
     Batch normalisation after every convolution and dropout on the down-sampling
     path. With the default filters this is ~1.95M parameters.
     """
     from tensorflow.keras.layers import (
-        BatchNormalization, Concatenate, Conv2D, Dropout, Input, MaxPooling2D,
+        BatchNormalization,
+        Concatenate,
+        Conv2D,
+        Dropout,
+        Input,
+        MaxPooling2D,
         UpSampling2D,
     )
     from tensorflow.keras.models import Model
@@ -29,11 +35,13 @@ def build_unet(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
     inputs = Input(input_shape)
 
     def block(tensor, channels, name):
-        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same",
-                        name=f"{name}_conv1")(tensor)
+        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same", name=f"{name}_conv1")(
+            tensor
+        )
         tensor = BatchNormalization(name=f"{name}_bn1")(tensor)
-        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same",
-                        name=f"{name}_conv2")(tensor)
+        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same", name=f"{name}_conv2")(
+            tensor
+        )
         tensor = BatchNormalization(name=f"{name}_bn2")(tensor)
         return tensor
 
@@ -45,8 +53,7 @@ def build_unet(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
         x = block(x, channels, f"enc{index}")
         skips.append(x)
         x = MaxPooling2D((2, 2), name=f"pool{index}")(x)
-        x = Dropout(min(dropout, 0.1) if index == 1 else dropout,
-                    name=f"drop{index}")(x)
+        x = Dropout(min(dropout, 0.1) if index == 1 else dropout, name=f"drop{index}")(x)
 
     # Bottleneck
     x = block(x, f4, "bottleneck")
@@ -60,19 +67,26 @@ def build_unet(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
             x = Dropout(dropout, name=f"ddrop{index}")(x)
 
     from tensorflow.keras.layers import Conv2D as _Conv2D
+
     outputs = _Conv2D(1, (1, 1), activation="sigmoid", name="mask")(x)
     return Model(inputs=inputs, outputs=outputs, name="unet")
 
 
-def build_deeplabv3(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
-                    dropout: float = 0.2, depth: int = 3):
+def build_deeplabv3(
+    input_shape=(256, 256, 3), filters=(32, 64, 128, 256), dropout: float = 0.2, depth: int = 3
+):
     """DeepLabV3-style head: atrous spatial pyramid pooling on the bottleneck.
 
     Parallel dilated convolutions capture context at several scales without
     losing resolution, which is what ASPP is for.
     """
     from tensorflow.keras.layers import (
-        BatchNormalization, Concatenate, Conv2D, Dropout, Input, MaxPooling2D,
+        BatchNormalization,
+        Concatenate,
+        Conv2D,
+        Dropout,
+        Input,
+        MaxPooling2D,
         UpSampling2D,
     )
     from tensorflow.keras.models import Model
@@ -81,8 +95,14 @@ def build_deeplabv3(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
     inputs = Input(input_shape)
 
     def block(tensor, channels, name, dilation=1):
-        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same",
-                        dilation_rate=dilation, name=f"{name}_conv")(tensor)
+        tensor = Conv2D(
+            channels,
+            (3, 3),
+            activation="relu",
+            padding="same",
+            dilation_rate=dilation,
+            name=f"{name}_conv",
+        )(tensor)
         tensor = BatchNormalization(name=f"{name}_bn")(tensor)
         return tensor
 
@@ -108,15 +128,21 @@ def build_deeplabv3(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
     return Model(inputs=inputs, outputs=outputs, name="deeplabv3")
 
 
-def build_segnet(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
-                 dropout: float = 0.2, depth: int = 3):
+def build_segnet(
+    input_shape=(256, 256, 3), filters=(32, 64, 128, 256), dropout: float = 0.2, depth: int = 3
+):
     """SegNet-style encoder-decoder.
 
     The decoder upsamples and convolves without concatenating encoder features,
     which is the memory-saving trade-off SegNet makes.
     """
     from tensorflow.keras.layers import (
-        BatchNormalization, Conv2D, Dropout, Input, MaxPooling2D, UpSampling2D,
+        BatchNormalization,
+        Conv2D,
+        Dropout,
+        Input,
+        MaxPooling2D,
+        UpSampling2D,
     )
     from tensorflow.keras.models import Model
 
@@ -124,11 +150,13 @@ def build_segnet(input_shape=(256, 256, 3), filters=(32, 64, 128, 256),
     inputs = Input(input_shape)
 
     def block(tensor, channels, name):
-        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same",
-                        name=f"{name}_conv1")(tensor)
+        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same", name=f"{name}_conv1")(
+            tensor
+        )
         tensor = BatchNormalization(name=f"{name}_bn1")(tensor)
-        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same",
-                        name=f"{name}_conv2")(tensor)
+        tensor = Conv2D(channels, (3, 3), activation="relu", padding="same", name=f"{name}_conv2")(
+            tensor
+        )
         tensor = BatchNormalization(name=f"{name}_bn2")(tensor)
         return tensor
 
@@ -156,13 +184,17 @@ BUILDERS: dict[str, Callable] = {
 }
 
 
-def build_model(arch: str = "unet", input_shape=(256, 256, 3),
-                filters=(32, 64, 128, 256), dropout: float = 0.2, depth: int = 3):
+def build_model(
+    arch: str = "unet",
+    input_shape=(256, 256, 3),
+    filters=(32, 64, 128, 256),
+    dropout: float = 0.2,
+    depth: int = 3,
+):
     """Build one of the supported architectures by name."""
     if arch not in BUILDERS:
         raise ValueError(f"unknown architecture '{arch}'; choose from {list(BUILDERS)}")
-    return BUILDERS[arch](input_shape=input_shape, filters=filters,
-                          dropout=dropout, depth=depth)
+    return BUILDERS[arch](input_shape=input_shape, filters=filters, dropout=dropout, depth=depth)
 
 
 # ---------------------------------------------------------------- param maths
@@ -176,8 +208,9 @@ def _bn_params(channels: int) -> int:
     return 4 * channels  # gamma + beta + 2 moving statistics
 
 
-def count_params_analytic(arch: str = "unet", filters=(32, 64, 128, 256),
-                          depth: int = 3, input_channels: int = 3) -> int:
+def count_params_analytic(
+    arch: str = "unet", filters=(32, 64, 128, 256), depth: int = 3, input_channels: int = 3
+) -> int:
     """Parameter count from the layer maths, without loading TensorFlow.
 
     Useful as a fast sanity check in tests: the published U-Net configuration
@@ -187,9 +220,13 @@ def count_params_analytic(arch: str = "unet", filters=(32, 64, 128, 256),
     f1, f2, f3, f4 = filters
     levels = [f1, f2, f3][:depth]
 
-    def block(cin, cout, name):  # noqa: ARG001 - name kept for symmetry
-        return (_conv_params(3, cin, cout) + _bn_params(cout)
-                + _conv_params(3, cout, cout) + _bn_params(cout))
+    def block(cin, cout, name):
+        return (
+            _conv_params(3, cin, cout)
+            + _bn_params(cout)
+            + _conv_params(3, cout, cout)
+            + _bn_params(cout)
+        )
 
     if arch in ("unet", "segnet"):
         total = 0

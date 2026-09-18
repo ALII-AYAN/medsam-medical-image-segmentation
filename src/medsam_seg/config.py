@@ -86,11 +86,11 @@ class AppConfig(BaseModel):
     inference: InferenceConfig = Field(default_factory=InferenceConfig)
 
     @classmethod
-    def from_dict(cls, payload: dict) -> "AppConfig":
+    def from_dict(cls, payload: dict) -> AppConfig:
         return cls(**payload)
 
     @classmethod
-    def from_yaml(cls, path: Path | str) -> "AppConfig":
+    def from_yaml(cls, path: Path | str) -> AppConfig:
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"config file not found: {path}")

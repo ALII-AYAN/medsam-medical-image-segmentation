@@ -22,7 +22,11 @@ from PIL import Image, ImageTk
 
 from medsam_seg.config import AppConfig
 from medsam_seg.predict import (
-    Predictor, compare_models, make_overlay, save_mask, save_overlay,
+    Predictor,
+    compare_models,
+    make_overlay,
+    save_mask,
+    save_overlay,
 )
 
 BG = "#ffffff"
@@ -71,8 +75,7 @@ class SegmentationApp:
             self._set_status(f"No weights at {path} - load one with --model", MUTED)
             return
         try:
-            self.predictor = Predictor.from_path(path, name="medsam",
-                                                 image_size=self.image_size)
+            self.predictor = Predictor.from_path(path, name="medsam", image_size=self.image_size)
             self._set_status(f"Loaded {path.name}", SUCCESS)
         except Exception as exc:  # noqa: BLE001 - surface anything to the user
             messagebox.showerror("Model error", str(exc))
@@ -81,8 +84,13 @@ class SegmentationApp:
     def _build_layout(self) -> None:
         header = tk.Frame(self.root, bg=PRIMARY, height=70)
         header.pack(fill=tk.X)
-        tk.Label(header, text="Medical Image Segmentation", font=("Arial", 19, "bold"),
-                 bg=PRIMARY, fg="white").pack(pady=18)
+        tk.Label(
+            header,
+            text="Medical Image Segmentation",
+            font=("Arial", 19, "bold"),
+            bg=PRIMARY,
+            fg="white",
+        ).pack(pady=18)
 
         main = tk.Frame(self.root, bg=BG)
         main.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
@@ -100,23 +108,30 @@ class SegmentationApp:
 
         self._build_controls()
 
-        self.status = tk.Label(self.root, text="", bd=1, relief=tk.SUNKEN, anchor=tk.W,
-                               bg="#ecf0f1", fg=PRIMARY, font=("Arial", 9))
+        self.status = tk.Label(
+            self.root,
+            text="",
+            bd=1,
+            relief=tk.SUNKEN,
+            anchor=tk.W,
+            bg="#ecf0f1",
+            fg=PRIMARY,
+            font=("Arial", 9),
+        )
         self.status.pack(side=tk.BOTTOM, fill=tk.X)
 
     def _labelled_canvas(self, parent, title: str) -> tk.Canvas:
-        frame = tk.LabelFrame(parent, text=title, font=("Arial", 10, "bold"),
-                              bg=BG, fg=PRIMARY)
+        frame = tk.LabelFrame(parent, text=title, font=("Arial", 10, "bold"), bg=BG, fg=PRIMARY)
         frame.pack(fill=tk.BOTH, expand=True, pady=4)
-        canvas = tk.Canvas(frame, bg="white", highlightthickness=1,
-                           highlightbackground="#dfe6e9")
+        canvas = tk.Canvas(frame, bg="white", highlightthickness=1, highlightbackground="#dfe6e9")
         canvas.pack(padx=8, pady=8, fill=tk.BOTH, expand=True)
         canvas.create_text(160, 90, text="No image", fill=MUTED, font=("Arial", 11))
         return canvas
 
     def _build_table(self, parent) -> None:
-        frame = tk.LabelFrame(parent, text=" Comparison ", font=("Arial", 10, "bold"),
-                              bg=BG, fg=PRIMARY)
+        frame = tk.LabelFrame(
+            parent, text=" Comparison ", font=("Arial", 10, "bold"), bg=BG, fg=PRIMARY
+        )
         frame.pack(fill=tk.BOTH, expand=True, pady=(0, 8))
         columns = ("Model", "Time (s)", "Dice", "IoU", "Foreground %")
         self.table = ttk.Treeview(frame, columns=columns, show="headings", height=6)
@@ -135,8 +150,9 @@ class SegmentationApp:
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
         from matplotlib.figure import Figure
 
-        frame = tk.LabelFrame(parent, text=" Charts ", font=("Arial", 10, "bold"),
-                              bg=BG, fg=PRIMARY)
+        frame = tk.LabelFrame(
+            parent, text=" Charts ", font=("Arial", 10, "bold"), bg=BG, fg=PRIMARY
+        )
         frame.pack(fill=tk.BOTH, expand=True)
         self.figure = Figure(figsize=(7, 3.2), dpi=100)
         self.figure.patch.set_facecolor(BG)
@@ -150,18 +166,30 @@ class SegmentationApp:
         bar = tk.Frame(self.root, bg=BG)
         bar.pack(pady=8)
         self.load_btn = self._button(bar, "Load image", self.load_image, ACCENT)
-        self.gt_btn = self._button(bar, "Load ground truth", self.load_ground_truth,
-                                   "#7f8c8d", state="disabled")
-        self.run_btn = self._button(bar, "Segment", self.run_prediction, SUCCESS,
-                                    state="disabled")
-        self.compare_btn = self._button(bar, "Compare models", self.run_comparison,
-                                        "#9b59b6", state="disabled")
-        self.save_btn = self._button(bar, "Save results", self.save_results, "#34495e",
-                                     state="disabled")
+        self.gt_btn = self._button(
+            bar, "Load ground truth", self.load_ground_truth, "#7f8c8d", state="disabled"
+        )
+        self.run_btn = self._button(bar, "Segment", self.run_prediction, SUCCESS, state="disabled")
+        self.compare_btn = self._button(
+            bar, "Compare models", self.run_comparison, "#9b59b6", state="disabled"
+        )
+        self.save_btn = self._button(
+            bar, "Save results", self.save_results, "#34495e", state="disabled"
+        )
 
     def _button(self, parent, text, command, colour, state="normal") -> tk.Button:
-        button = tk.Button(parent, text=text, command=command, font=("Arial", 10, "bold"),
-                           bg=colour, fg="white", width=15, padx=8, pady=5, state=state)
+        button = tk.Button(
+            parent,
+            text=text,
+            command=command,
+            font=("Arial", 10, "bold"),
+            bg=colour,
+            fg="white",
+            width=15,
+            padx=8,
+            pady=5,
+            state=state,
+        )
         button.pack(side=tk.LEFT, padx=4)
         return button
 
@@ -171,8 +199,9 @@ class SegmentationApp:
         if isinstance(array, np.ndarray):
             if array.ndim == 2 or array.shape[-1] == 1:
                 data = np.asarray(array).squeeze()
-                image = Image.fromarray((data * 255).clip(0, 255).astype(np.uint8),
-                                        mode="L").convert("RGB")
+                image = Image.fromarray(
+                    (data * 255).clip(0, 255).astype(np.uint8), mode="L"
+                ).convert("RGB")
             else:
                 image = Image.fromarray((np.clip(array, 0, 1) * 255).astype(np.uint8))
         else:
@@ -203,16 +232,17 @@ class SegmentationApp:
     def load_image(self) -> None:
         path = filedialog.askopenfilename(
             title="Select medical image",
-            filetypes=[("Images", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff"),
-                       ("All files", "*.*")],
+            filetypes=[("Images", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff"), ("All files", "*.*")],
         )
         if not path:
             return
         try:
             with Image.open(path) as handle:
                 rgb = handle.convert("RGB")
-                self.image_array = np.asarray(
-                    rgb.resize(self.image_size, Image.BILINEAR), dtype=np.float32) / 255.0
+                self.image_array = (
+                    np.asarray(rgb.resize(self.image_size, Image.BILINEAR), dtype=np.float32)
+                    / 255.0
+                )
                 preview = rgb.copy()
         except Exception as exc:  # noqa: BLE001
             messagebox.showerror("Error", f"Cannot open image: {exc}")
@@ -242,8 +272,9 @@ class SegmentationApp:
         try:
             with Image.open(path) as handle:
                 mask = handle.convert("L").resize(self.image_size, Image.NEAREST)
-                self.ground_truth = (np.asarray(mask, dtype=np.float32) / 255.0 > 0.5
-                                     ).astype(np.float32)
+                self.ground_truth = (np.asarray(mask, dtype=np.float32) / 255.0 > 0.5).astype(
+                    np.float32
+                )
         except Exception as exc:  # noqa: BLE001
             messagebox.showerror("Error", f"Cannot open mask: {exc}")
             return
@@ -252,8 +283,7 @@ class SegmentationApp:
     def _clear_canvases(self) -> None:
         for canvas in (self.mask_canvas, self.overlay_canvas):
             canvas.delete("all")
-            canvas.create_text(160, 90, text="Run segmentation", fill=MUTED,
-                               font=("Arial", 11))
+            canvas.create_text(160, 90, text="Run segmentation", fill=MUTED, font=("Arial", 11))
 
     def run_prediction(self) -> None:
         if self.predictor is None:
@@ -305,8 +335,7 @@ class SegmentationApp:
             self._draw_charts(available)
             self.latest_mask = available[0].mask
             self._show(self.mask_canvas, available[0].mask)
-            self._show(self.overlay_canvas,
-                       make_overlay(self.image_array, available[0].mask))
+            self._show(self.overlay_canvas, make_overlay(self.image_array, available[0].mask))
             self.save_btn.config(state="normal")
 
         if report.missing:
@@ -322,8 +351,13 @@ class SegmentationApp:
             return (result.model_name.upper(), "-", "-", "-", "-")
         dice = f"{result.dice:.4f}" if result.dice is not None else "n/a"
         iou = f"{result.iou:.4f}" if result.iou is not None else "n/a"
-        return (result.model_name.upper(), f"{result.inference_time:.3f}", dice, iou,
-                f"{result.foreground_percent:.2f}")
+        return (
+            result.model_name.upper(),
+            f"{result.inference_time:.3f}",
+            dice,
+            iou,
+            f"{result.foreground_percent:.2f}",
+        )
 
     def save_results(self) -> None:
         if self.latest_mask is None or self.image_path is None:
@@ -334,8 +368,9 @@ class SegmentationApp:
             return
         destination = Path(directory)
         save_mask(self.latest_mask, destination / f"{self.image_path.stem}_mask.png")
-        save_overlay(self.image_array, self.latest_mask,
-                     destination / f"{self.image_path.stem}_overlay.png")
+        save_overlay(
+            self.image_array, self.latest_mask, destination / f"{self.image_path.stem}_overlay.png"
+        )
         self._set_status(f"Saved mask and overlay to {destination}", SUCCESS)
 
     # ----------------------------------------------------------------- charts
@@ -343,8 +378,15 @@ class SegmentationApp:
     def _draw_empty_charts(self) -> None:
         for axis, title in ((self.ax_time, "Inference time"), (self.ax_score, "Dice / IoU")):
             axis.clear()
-            axis.text(0.5, 0.5, "Run a comparison\nto see charts", ha="center",
-                      va="center", fontsize=9, color="gray")
+            axis.text(
+                0.5,
+                0.5,
+                "Run a comparison\nto see charts",
+                ha="center",
+                va="center",
+                fontsize=9,
+                color="gray",
+            )
             axis.set_title(title, fontsize=9)
             axis.set_xticks([])
             axis.set_yticks([])
@@ -363,21 +405,29 @@ class SegmentationApp:
         self.ax_time.grid(axis="y", alpha=0.3)
 
         self.ax_score.clear()
-        scored = [(r.model_name.upper(), r.dice, r.iou) for r in results
-                  if r.dice is not None]
+        scored = [(r.model_name.upper(), r.dice, r.iou) for r in results if r.dice is not None]
         if scored:
             positions = np.arange(len(scored))
             width = 0.38
-            self.ax_score.bar(positions - width / 2, [s[1] for s in scored], width,
-                              label="Dice", color="#27ae60")
-            self.ax_score.bar(positions + width / 2, [s[2] for s in scored], width,
-                              label="IoU", color="#3498db")
+            self.ax_score.bar(
+                positions - width / 2, [s[1] for s in scored], width, label="Dice", color="#27ae60"
+            )
+            self.ax_score.bar(
+                positions + width / 2, [s[2] for s in scored], width, label="IoU", color="#3498db"
+            )
             self.ax_score.set_xticks(positions)
             self.ax_score.set_xticklabels([s[0] for s in scored], fontsize=7)
             self.ax_score.legend(fontsize=7)
         else:
-            self.ax_score.text(0.5, 0.5, "Load a ground-truth\nmask for Dice/IoU",
-                               ha="center", va="center", fontsize=8, color="gray")
+            self.ax_score.text(
+                0.5,
+                0.5,
+                "Load a ground-truth\nmask for Dice/IoU",
+                ha="center",
+                va="center",
+                fontsize=8,
+                color="gray",
+            )
             self.ax_score.set_xticks([])
         self.ax_score.set_title("Accuracy vs ground truth", fontsize=9)
         self.ax_score.tick_params(axis="y", labelsize=7)
@@ -391,7 +441,8 @@ class SegmentationApp:
 def launch(config: AppConfig) -> None:
     """Open the GUI window."""
     try:
-        from ctypes import windll  # noqa: F401  Windows DPI awareness
+        from ctypes import windll
+
         windll.shcore.SetProcessDpiAwareness(1)
     except Exception:  # noqa: BLE001 - non-Windows or older Windows
         pass

@@ -21,12 +21,14 @@ def dataset_dir(tmp_path):
 
     for index in range(6):
         # Images vary so a model cannot trivially memorise them.
-        array = ([[255 if (row + col + index) % 3 == 0 else 0
-                   for col in range(16)] for row in range(16)])
+        array = [
+            [255 if (row + col + index) % 3 == 0 else 0 for col in range(16)] for row in range(16)
+        ]
         Image.fromarray(_to_uint8(array)).save(images / f"case{index}.png")
         # Masks: a growing square, so foreground fraction differs per sample.
-        mask = [[255 if (row < index and col < index) else 0
-                 for col in range(16)] for row in range(16)]
+        mask = [
+            [255 if (row < index and col < index) else 0 for col in range(16)] for row in range(16)
+        ]
         Image.fromarray(_to_uint8(mask)).save(masks / f"case{index}_mask.png")
 
     # Deliberate defects: an image with no mask, and a mask with no image.

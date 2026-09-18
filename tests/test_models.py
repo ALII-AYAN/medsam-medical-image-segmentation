@@ -44,6 +44,7 @@ def test_unknown_architecture_raises():
 
 def test_hand_computed_two_stage_unet():
     """Independent check: 16 filters, depth 2, 1 input channel."""
+
     def conv(k, cin, cout):
         return k * k * cin * cout + cout
 
@@ -54,7 +55,15 @@ def test_hand_computed_two_stage_unet():
         return conv(3, cin, cout) + bn(cout) + conv(3, cout, cout) + bn(cout)
 
     # enc(1->16), enc(16->32), bottleneck(32->64), dec(64+32->32), dec(32+16->16), out(16->1)
-    expected = (block(1, 16) + block(16, 32) + block(32, 64)
-                + block(64 + 32, 32) + block(32 + 16, 16) + conv(1, 16, 1))
-    assert count_params_analytic("unet", filters=(16, 32, 64, 64), depth=2,
-                                 input_channels=1) == expected
+    expected = (
+        block(1, 16)
+        + block(16, 32)
+        + block(32, 64)
+        + block(64 + 32, 32)
+        + block(32 + 16, 16)
+        + conv(1, 16, 1)
+    )
+    assert (
+        count_params_analytic("unet", filters=(16, 32, 64, 64), depth=2, input_channels=1)
+        == expected
+    )

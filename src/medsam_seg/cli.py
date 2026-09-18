@@ -1,12 +1,12 @@
 """Command line entry point.
 
-    python -m medsam_seg check          verify the dataset layout
-    python -m medsam_seg info           print the resolved configuration
-    python -m medsam_seg train          train a model
-    python -m medsam_seg evaluate       score a saved model
-    python -m medsam_seg predict IMAGE  segment one image
-    python -m medsam_seg compare IMAGE  compare every architecture with weights
-    python -m medsam_seg gui            open the desktop application
+python -m medsam_seg check          verify the dataset layout
+python -m medsam_seg info           print the resolved configuration
+python -m medsam_seg train          train a model
+python -m medsam_seg evaluate       score a saved model
+python -m medsam_seg predict IMAGE  segment one image
+python -m medsam_seg compare IMAGE  compare every architecture with weights
+python -m medsam_seg gui            open the desktop application
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from pathlib import Path
 
 import typer
 
-from medsam_seg.config import AppConfig, PROJECT_ROOT
+from medsam_seg.config import AppConfig
 
 app = typer.Typer(add_completion=False, help="Medical image segmentation toolkit.")
 
@@ -125,8 +125,9 @@ def _load_ground_truth(path: Path, size: tuple[int, int]):
     from PIL import Image
 
     with Image.open(path) as handle:
-        array = np.asarray(handle.convert("L").resize(size, Image.NEAREST),
-                           dtype=np.float32) / 255.0
+        array = (
+            np.asarray(handle.convert("L").resize(size, Image.NEAREST), dtype=np.float32) / 255.0
+        )
     return (array > 0.5).astype(np.float32)[..., np.newaxis]
 
 
@@ -160,8 +161,7 @@ def predict(
     # Reuse the exact tensor the model saw, so the overlay lines up with the mask.
     display_image = predictor.preprocess(str(image))[0]
     save_mask(result.mask, output_dir / f"{Path(image).stem}_mask.png")
-    save_overlay(display_image, result.mask,
-                 output_dir / f"{Path(image).stem}_overlay.png")
+    save_overlay(display_image, result.mask, output_dir / f"{Path(image).stem}_overlay.png")
     typer.echo(json.dumps(result.to_dict(), indent=2))
     typer.echo(f"\nSaved to {output_dir}")
 
@@ -176,9 +176,12 @@ def compare(
     from medsam_seg.predict import compare_models
 
     settings = _load(config)
-    report = compare_models(str(image), Path(weights_dir),
-                            image_size=tuple(settings.data.image_size),
-                            threshold=settings.inference.threshold)
+    report = compare_models(
+        str(image),
+        Path(weights_dir),
+        image_size=tuple(settings.data.image_size),
+        threshold=settings.inference.threshold,
+    )
     typer.echo(json.dumps(report.to_dict(), indent=2))
     if report.missing:
         typer.echo(f"\nNo weights for: {', '.join(report.missing)}")

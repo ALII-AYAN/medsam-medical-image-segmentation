@@ -79,8 +79,9 @@ def discover_pairs(image_dir: Path, mask_dir: Path, mask_suffix: str = "_mask") 
     return pairs
 
 
-def load_image(path: Path, size: tuple[int, int] = (256, 256),
-               grayscale: bool = False) -> np.ndarray:
+def load_image(
+    path: Path, size: tuple[int, int] = (256, 256), grayscale: bool = False
+) -> np.ndarray:
     """Load an image as a float32 array in [0, 1].
 
     RGB for inputs, single-channel for masks. Values are divided by 255 so the
@@ -96,8 +97,9 @@ def load_image(path: Path, size: tuple[int, int] = (256, 256),
     return array
 
 
-def load_pair(pair: Pair, size: tuple[int, int] = (256, 256),
-              mask_threshold: float = 0.5) -> tuple[np.ndarray, np.ndarray]:
+def load_pair(
+    pair: Pair, size: tuple[int, int] = (256, 256), mask_threshold: float = 0.5
+) -> tuple[np.ndarray, np.ndarray]:
     """Load an image/mask pair, binarising the mask."""
     image = load_image(pair.image_path, size, grayscale=False)
     mask = load_image(pair.mask_path, size, grayscale=True)
@@ -105,19 +107,19 @@ def load_pair(pair: Pair, size: tuple[int, int] = (256, 256),
     return image, mask
 
 
-def split_pairs(pairs: list[Pair], val_split: float = 0.2,
-                seed: int = 42) -> tuple[list[Pair], list[Pair]]:
+def split_pairs(
+    pairs: list[Pair], val_split: float = 0.2, seed: int = 42
+) -> tuple[list[Pair], list[Pair]]:
     """Deterministic shuffle then split. The seed makes runs reproducible."""
     if not 0.0 < val_split < 1.0:
         raise ValueError(f"val_split must be in (0, 1), got {val_split}")
     shuffled = list(pairs)
     random.Random(seed).shuffle(shuffled)
-    n_val = max(1, int(round(len(shuffled) * val_split)))
+    n_val = max(1, round(len(shuffled) * val_split))
     return shuffled[:-n_val], shuffled[-n_val:]
 
 
-def load_split(pairs: list[Pair], size: tuple[int, int] = (256, 256),
-               mask_threshold: float = 0.5):
+def load_split(pairs: list[Pair], size: tuple[int, int] = (256, 256), mask_threshold: float = 0.5):
     """Load a whole split into two NumPy arrays."""
     images, masks = [], []
     for pair in pairs:
@@ -127,19 +129,26 @@ def load_split(pairs: list[Pair], size: tuple[int, int] = (256, 256),
     return np.stack(images), np.stack(masks)
 
 
-def dataset_summary(pairs: list[Pair], size: tuple[int, int] = (256, 256),
-                    mask_threshold: float = 0.5, sample: int | None = 200) -> dict:
+def dataset_summary(
+    pairs: list[Pair],
+    size: tuple[int, int] = (256, 256),
+    mask_threshold: float = 0.5,
+    sample: int | None = 200,
+) -> dict:
     """Cheap overview: counts, mask balance and a foreground estimate."""
     from medsam_seg.metrics import class_distribution
 
-    distributions = [class_distribution(load_pair(p, size, mask_threshold)[1], mask_threshold)
-                     for p in (pairs[:sample] if sample else pairs)]
+    distributions = [
+        class_distribution(load_pair(p, size, mask_threshold)[1], mask_threshold)
+        for p in (pairs[:sample] if sample else pairs)
+    ]
     foreground = [d.get(1, 0.0) for d in distributions if d]
     return {
         "n_pairs": len(pairs),
         "image_size": list(size),
         "background_percent": round(float(np.mean([d.get(0, 0.0) for d in distributions])), 2)
-        if foreground else 0.0,
+        if foreground
+        else 0.0,
         "foreground_percent": round(float(np.mean(foreground)), 2) if foreground else 0.0,
         "sampled": len(distributions),
     }
