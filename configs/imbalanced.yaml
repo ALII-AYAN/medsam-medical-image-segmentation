@@ -1,0 +1,7 @@
+# For heavily background-dominated masks: weight the foreground 8x and
+# train longer than the 5-epoch baseline.
+training:
+  epochs: 30
+  loss: bce_dice
+  pos_weight: 8.0
+  early_stopping_patience: 5

@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Datasets are large and usually licensed - never commit them.
+data/images/*
+data/masks/*
+!data/images/.gitkeep
+!data/masks/.gitkeep
+
+# Trained weights
+models/*.keras
+models/*.h5
+models/*.hdf5
+models/saved_model/
+
+# Generated output
+outputs/*
+!outputs/.gitkeep
+
+.pytest_cache/
+.ruff_cache/
+.coverage

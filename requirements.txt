@@ -1,0 +1,17 @@
+# Core
+numpy>=1.24
+PyYAML>=6.0
+pydantic>=2.5
+typer>=0.9
+tqdm>=4.66
+
+# Images
+pillow>=10.0
+opencv-python-headless>=4.8
+matplotlib>=3.7
+
+# Model (heavy - installs torch-free TensorFlow CPU build)
+tensorflow>=2.13
+
+# Metrics
+scikit-learn>=1.3

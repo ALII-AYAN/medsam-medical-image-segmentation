@@ -1,0 +1,9 @@
+# SegNet variant for the four-way comparison.
+model:
+  arch: segnet
+  filters: [32, 64, 128, 256]
+
+training:
+  epochs: 5
+  batch_size: 4
+  model_save_path: models/segnet.keras

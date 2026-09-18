@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medsam-segmentation"
+version = "1.0.0"
+description = "MedSAM-style medical image segmentation with a clinical Tkinter GUI"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.24",
+    "PyYAML>=6.0",
+    "pydantic>=2.5",
+    "typer>=0.9",
+    "pillow>=10.0",
+    "matplotlib>=3.7",
+    "tensorflow>=2.13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.3"]
+gui = ["pillow>=10.0", "matplotlib>=3.7"]
+
+[project.scripts]
+medsam = "medsam_seg.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

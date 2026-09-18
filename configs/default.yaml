@@ -1,0 +1,36 @@
+# Default configuration - matches the settings used for the reported results.
+data:
+  image_dir: data/images
+  mask_dir: data/masks
+  image_size: [256, 256]
+  mask_suffix: _mask        # case1.png -> case1_mask.png
+  val_split: 0.2
+  seed: 42
+  mask_threshold: 0.5
+
+model:
+  arch: unet                # unet | deeplabv3 | segnet
+  filters: [32, 64, 128, 256]
+  dropout: 0.2
+  depth: 3
+
+training:
+  epochs: 5
+  batch_size: 4
+  learning_rate: 0.001
+  loss: bce_dice            # bce | dice | bce_dice
+  pos_weight: 1.0           # raise above 1 to fight background dominance
+  output_dir: outputs
+  model_save_path: models/medsam_model.keras
+  reduce_lr_patience: 2
+  early_stopping_patience: 0   # 0 disables early stopping
+
+eval:
+  threshold: 0.5
+  num_samples: 3
+  output_dir: outputs
+
+inference:
+  model_path: models/medsam_model.keras
+  compare_dir: models
+  threshold: 0.5
